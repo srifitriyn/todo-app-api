@@ -19,4 +19,7 @@ db.once("open", () => {
 });
 
 const userRouter = require("./routers/user-routes");
-app.use(userRouter);
+const todoRouter = require("./routers/todo-routes");
+
+app.use("/user", userRouter);
+app.use("/todoapp", todoRouter);

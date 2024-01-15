@@ -2,17 +2,21 @@ const User = require("../models/user-model");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
-const getUser = async (req, res) => {
+
+const getUsers = async (req, res) => {
   try {
-    const todos = await User.find({});
+    const users = await User.find({});
     res.status(200).json({
       message: "Showing all users",
-      todos,
+      users,
     });
   } catch (err) {
-    res.status(500).send(err.message);
+    res.status(500).send({
+      message: "Internal server error",
+      error: err.message,
+    });
   }
-};
+}
 
 const register = async (req, res) => {
   try {
@@ -36,7 +40,7 @@ const register = async (req, res) => {
           email,
           password: hashedPassword,
         });
-        return res.status(200).send({
+        return res.status(201).send({
           message: "User succesfully registered.",
           newUser,
         });
@@ -46,35 +50,44 @@ const register = async (req, res) => {
     console.error("Error registering user:", err);
     return res.status(500).send({
       message: "Internal server error",
+      error: err.message,
     });
   }
 };
 
 const login = async (req, res) => {
-  const { email, password } = req.body;
-  const user = await User.findOne({ email });
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
 
-  if (!user) {
-    return res.status(404).send({
-      message: "User not found",
-    });
-  } else {
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(401).send({
-        message: "Invalid password",
+    if (!user) {
+      return res.status(404).send({
+        message: "User not found",
       });
     } else {
-      const token = jwt.sign({ _id: user._id }, process.env.SECRET_KEY, {
-        expiresIn: "8h",
-      });
-      res.status(201).send({ message: "login succesfully", token });
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) {
+        return res.status(401).send({
+          message: "Invalid password",
+        });
+      } else {
+        console.log(user._id);
+        const token = jwt.sign({ _id: user._id }, process.env.SECRET_KEY, {
+          expiresIn: "8h",
+        })        
+        res.status(200).send({ message: "Login succesfully", token });
+      }
     }
+  } catch (err) {
+    res.status(500).send({
+      message: "Internal server error",
+      error: err.message,
+    });
   }
 };
 
 module.exports = {
-  getUser,
+  getUsers,
   register,
   login,
 };

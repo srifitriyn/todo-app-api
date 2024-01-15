@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-const Todo = require("./todo-model")
 
 const userSchema = new Schema(
   {
