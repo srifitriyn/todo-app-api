@@ -22,5 +22,4 @@
 
 
 ## Notes:
-This API 
 Feedback is greatly appreciated!
